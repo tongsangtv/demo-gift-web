@@ -1,0 +1,6 @@
+{
+  "name": "Tâm Ý - Gợi Ý Quà Tặng Ý Nghĩa",
+  "description": "Nền tảng đề xuất quà tặng tinh tế cho cặp đôi và bạn bè theo sở thích, ngân sách và dịp kỷ niệm, tích hợp trợ lý AI gợi ý tâm lý và viết thiệp chân thành.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
