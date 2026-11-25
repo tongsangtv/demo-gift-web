@@ -374,10 +374,9 @@ Yêu cầu trả về đúng định dạng JSON có cấu trúc sau:
 app.post('/api/gemini/card', async (req, res) => {
   const { recipientName, recipientType, occasion, memories, giftDetails, tone } = req.body;
 
-  // Try calling Gemini model with fallback cascade
   if (ai) {
     const prompt = `Bạn là chuyên gia viết lời chúc thiệp mừng đầy cảm xúc, tinh tế và văn phong tự nhiên tại Việt Nam.
-Hãy sáng tác 3 phiên bản thiệp chúc mừng cá nhân hóa sâu sắc theo thông tin sau:
+Hãy viết đúng 3 phiên bản lời chúc ngắn gọn, cá nhân hóa theo thông tin sau:
 - Người nhận: ${recipientName || 'Người thương'}
 - Mối quan hệ: ${recipientType || 'Người yêu'}
 - Dịp kỷ niệm / Sự kiện: ${occasion || 'Kỷ niệm đặc biệt'}
@@ -386,10 +385,9 @@ Hãy sáng tác 3 phiên bản thiệp chúc mừng cá nhân hóa sâu sắc th
 - Phong cách ưu tiên: ${tone || 'Chân thành & Cá nhân hóa'}
 
 YÊU CẦU BẮT BUỘC:
-1. Mỗi lời chúc PHẢI lồng ghép trực tiếp và tinh tế món quà "${giftDetails || 'món quà này'}" vào nội dung thiệp (nói rõ lý do bạn chọn món quà này cho họ nhân dịp ${occasion}, ý nghĩa biểu trưng của món quà, hoặc cảm xúc mong muốn người nhận cảm nhận được khi mở món quà).
-2. Viết bằng tiếng Việt tự nhiên, ấm áp, giàu cảm xúc, không sáo rỗng.
-3. Độ dài mỗi lời chúc từ 3 - 5 câu hoàn chỉnh, thích hợp để viết nắn nót vào tấm thiệp tay trao kèm hộp quà.
-4. Trả về đúng định dạng JSON có cấu trúc sau:
+1. Mỗi lời chúc dài 2-3 câu, viết bằng tiếng Việt tự nhiên, ấm áp, tránh sáo rỗng.
+2. Nhắc đến món quà và ít nhất một chi tiết/kỷ niệm riêng một cách tự nhiên.
+3. Trả về đúng JSON, không thêm nội dung ngoài JSON:
 {
   "cards": [
     {
@@ -407,32 +405,42 @@ YÊU CẦU BẮT BUỘC:
   ]
 }`;
 
-    const modelsToTry = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
-    for (const modelName of modelsToTry) {
-      try {
-        const response = await ai.models.generateContent({
-          model: modelName,
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json',
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 700,
+          httpOptions: {
+            timeout: 8000,
+            retryOptions: { attempts: 1 },
           },
-        });
+        },
+      });
 
-        if (response.text) {
-          const parsed = cleanJsonOutput(response.text);
-          if (parsed && Array.isArray(parsed.cards)) {
-            return res.json(parsed);
-          }
+      if (response.text) {
+        const parsed = cleanJsonOutput(response.text);
+        const cards = Array.isArray(parsed?.cards)
+          ? parsed.cards.filter(
+              (card: any) =>
+                typeof card?.style === 'string' &&
+                typeof card?.message === 'string' &&
+                card.message.trim().length > 0
+            )
+          : [];
+        if (cards.length > 0) {
+          return res.json({ cards, source: 'ai' });
         }
-      } catch (err: any) {
-        console.warn(`Model ${modelName} unavailable for card generation (${err?.message || err}).`);
       }
+      console.warn('Card generation returned no usable cards; using the local fallback.');
+    } catch (err: any) {
+      console.warn(`Card generation failed; using the local fallback (${err?.message || err}).`);
     }
   }
 
-  // Graceful fallback to guaranteed heartfelt cards in Vietnamese
   const fallbackCards = generateFallbackCards(recipientName, recipientType, occasion, memories, giftDetails);
-  return res.json({ cards: fallbackCards });
+  return res.json({ cards: fallbackCards, source: 'fallback' });
 });
 
 async function startServer() {

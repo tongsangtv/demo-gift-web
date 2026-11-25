@@ -65,6 +65,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
 
   const [loadingCards, setLoadingCards] = useState(false);
   const [cards, setCards] = useState<AICardMessage[]>([]);
+  const [cardGenerationSource, setCardGenerationSource] = useState<'ai' | 'fallback' | null>(null);
   const [editingCardIdx, setEditingCardIdx] = useState<number | null>(null);
   const [editedMessages, setEditedMessages] = useState<Record<number, string>>({});
 
@@ -134,6 +135,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
     setLoadingCards(true);
     setErrorMessage(null);
     setCards([]);
+    setCardGenerationSource(null);
     setEditingCardIdx(null);
     setEditedMessages({});
 
@@ -157,6 +159,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       const data = await res.json();
       if (data.cards && data.cards.length > 0) {
         setCards(data.cards);
+        setCardGenerationSource(data.source === 'fallback' ? 'fallback' : 'ai');
       } else if (data.error) {
         setErrorMessage(data.error);
       }
@@ -604,7 +607,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                   {loadingCards ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-amber-300" />
-                      <span>Gemini AI đang sáng tác lời chúc lồng ghép món quà...</span>
+                      <span>Đang viết 3 lời chúc cá nhân hóa (tối đa 8 giây)...</span>
                     </>
                   ) : (
                     <>
@@ -627,10 +630,23 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                         Đã lồng ghép dịp: <strong>{getEffectiveOccasion()}</strong> · Món quà: <strong>{getEffectiveGiftDetails()}</strong>
                       </p>
                     </div>
-                    <span className="text-xs text-emerald-800 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-md self-start sm:self-auto border border-emerald-200">
-                      ✓ Đã tối ưu bằng AI
+                    <span
+                      className={`text-xs font-semibold px-2.5 py-0.5 rounded-md self-start sm:self-auto border ${
+                        cardGenerationSource === 'fallback'
+                          ? 'text-amber-800 bg-amber-50 border-amber-200'
+                          : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                      }`}
+                    >
+                      {cardGenerationSource === 'fallback'
+                        ? '⚡ Bản gợi ý nhanh'
+                        : '✓ Đã tối ưu bằng AI'}
                     </span>
                   </div>
+                  {cardGenerationSource === 'fallback' && (
+                    <p className="text-[11px] text-amber-800">
+                      AI đang bận hoặc chưa khả dụng; đây là lời chúc mẫu được tạo ngay. Bạn có thể thử lại sau.
+                    </p>
+                  )}
 
                   {/* Feature banner: Export Card to Image */}
                   <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between gap-3">
