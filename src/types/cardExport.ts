@@ -34,12 +34,10 @@ export interface CardExportData {
   senderName: string;
   occasion: string;
   message: string;
-  giftTitle?: string;
   dateString?: string;
   theme: CardThemeId;
   aspectRatio: CardAspectRatio;
   fontStyle: CardFontStyle;
   showWaxSeal: boolean;
-  showGiftBadge: boolean;
   showWatermark: boolean;
 }

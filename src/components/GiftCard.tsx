@@ -102,9 +102,15 @@ export const GiftCard: React.FC<GiftCardProps> = ({
           <div className="flex items-center gap-2 text-xs text-stone-500 mb-2">
             <span>{gift.categoryName}</span>
             <span aria-hidden="true">·</span>
-            <span className="tabular-nums font-medium text-stone-700">★ {gift.rating.toFixed(1)}</span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums text-stone-400">({gift.reviewsCount} lời khen)</span>
+            {gift.reviewsCount > 0 ? (
+              <>
+                <span className="tabular-nums font-medium text-stone-700">★ {gift.rating.toFixed(1)}</span>
+                <span aria-hidden="true">·</span>
+                <span className="tabular-nums text-stone-400">({gift.reviewsCount} lời khen)</span>
+              </>
+            ) : (
+              <span className="text-stone-400">Chưa có đánh giá</span>
+            )}
           </div>
 
           {/* Product Title */}
@@ -172,7 +178,7 @@ export const GiftCard: React.FC<GiftCardProps> = ({
             ) : (
               <>
                 <Plus className="w-3.5 h-3.5 text-stone-500" />
-                <span>+ Bộ sưu tập</span>
+                <span>Bộ sưu tập</span>
               </>
             )}
           </button>

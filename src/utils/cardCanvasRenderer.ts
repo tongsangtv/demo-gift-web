@@ -89,8 +89,8 @@ export const CARD_THEMES: Record<CardThemeId, CardThemeConfig> = {
 export function getCanvasDimensions(ratio: CardExportData['aspectRatio']) {
   switch (ratio) {
     case 'story':
-      // 9:14 high resolution - optimized for viewing on phones & messaging apps
-      return { width: 1080, height: 1620, scale: 2 };
+      // Portrait layout for sharing on phones and messaging apps
+      return { width: 900, height: 1350, scale: 2 };
     case 'postcard':
       // 4:3 landscape greeting postcard
       return { width: 1200, height: 900, scale: 2 };
@@ -290,12 +290,37 @@ export async function renderCardToCanvas(
   canvas: HTMLCanvasElement,
   data: CardExportData
 ): Promise<void> {
-  const { width, height } = getCanvasDimensions(data.aspectRatio);
+  const { width, height: baseHeight } = getCanvasDimensions(data.aspectRatio);
   canvas.width = width;
-  canvas.height = height;
+  canvas.height = baseHeight;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
+
+  const pad = data.aspectRatio === 'postcard' ? 36 : 48;
+  const contentPadX = pad + 40;
+  const contentWidth = width - contentPadX * 2;
+  const bodyFontSize =
+    data.aspectRatio === 'postcard' ? 30 : data.aspectRatio === 'story' ? 34 : 32;
+  const bodyLineHeight = bodyFontSize + (data.fontStyle === 'handwriting' ? 18 : 14);
+
+  if (data.fontStyle === 'handwriting') {
+    ctx.font = `600 ${bodyFontSize + 6}px "Caveat", cursive`;
+  } else if (data.fontStyle === 'modern') {
+    ctx.font = `500 ${bodyFontSize}px "Plus Jakarta Sans", sans-serif`;
+  } else {
+    ctx.font = `italic ${bodyFontSize}px "Playfair Display", Georgia, serif`;
+  }
+
+  const messageLines = wrapText(ctx, data.message, contentWidth);
+  let height = baseHeight;
+  if (data.aspectRatio === 'story') {
+    const headerHeight = data.occasion ? 228 : 192;
+    const messageHeight = Math.max(1, messageLines.length) * bodyLineHeight;
+    const footerHeight = data.showWaxSeal ? 140 : 100;
+    height = Math.max(900, headerHeight + messageHeight + 36 + pad + footerHeight);
+    canvas.height = height;
+  }
 
   const themeConfig = CARD_THEMES[data.theme] || CARD_THEMES.ivory_blossom;
   const isDark = data.theme === 'midnight_elegance';
@@ -321,7 +346,6 @@ export async function renderCardToCanvas(
   ctx.restore();
 
   // 2. Decorative Double Outer Border
-  const pad = data.aspectRatio === 'postcard' ? 36 : 48;
   const bw = width - pad * 2;
   const bh = height - pad * 2;
 
@@ -350,8 +374,6 @@ export async function renderCardToCanvas(
   ctx.restore();
 
   // 3. Top Occasion Badge / Header
-  const contentPadX = pad + 40;
-  const contentWidth = width - contentPadX * 2;
   let cursorY = pad + 44;
 
   // Small Top brand mark
@@ -436,23 +458,8 @@ export async function renderCardToCanvas(
 
   // 5. Message Body
   ctx.save();
-  let bodyFontSize = 18;
-  let bodyLineHeight = 32;
-
-  if (data.aspectRatio === 'postcard') {
-    bodyFontSize = 17;
-    bodyLineHeight = 30;
-  } else if (data.aspectRatio === 'story') {
-    bodyFontSize = 20;
-    bodyLineHeight = 36;
-  } else {
-    bodyFontSize = 18;
-    bodyLineHeight = 32;
-  }
-
   if (data.fontStyle === 'handwriting') {
     ctx.font = `600 ${bodyFontSize + 6}px "Caveat", cursive`;
-    bodyLineHeight += 4;
   } else if (data.fontStyle === 'modern') {
     ctx.font = `500 ${bodyFontSize}px "Plus Jakarta Sans", sans-serif`;
   } else {
@@ -490,41 +497,7 @@ export async function renderCardToCanvas(
 
   ctx.restore();
 
-  cursorY += 20;
-
-  // 6. Gift Details Banner (Optional / Included)
-  if (data.showGiftBadge && data.giftTitle) {
-    ctx.save();
-    const giftBoxY = cursorY;
-    const giftBoxH = 46;
-
-    ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.03)';
-    ctx.beginPath();
-    ctx.roundRect(contentPadX, giftBoxY, contentWidth, giftBoxH, 10);
-    ctx.fill();
-
-    ctx.strokeStyle = themeConfig.innerBorderColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(contentPadX, giftBoxY, contentWidth, giftBoxH, 10);
-    ctx.stroke();
-
-    ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = themeConfig.accentColor;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🎁 MÓN QUÀ GỬI KÈM:', contentPadX + 16, giftBoxY + giftBoxH / 2);
-
-    ctx.font = '500 13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = themeConfig.textColor;
-    ctx.fillText(data.giftTitle, contentPadX + 170, giftBoxY + giftBoxH / 2);
-
-    ctx.restore();
-
-    cursorY += giftBoxH + 28;
-  } else {
-    cursorY += 16;
-  }
+  cursorY += 36;
 
   // 7. Signature & Date Section (Anchored towards bottom)
   const bottomSectionY = Math.max(cursorY, height - pad - (data.showWaxSeal ? 140 : 100));

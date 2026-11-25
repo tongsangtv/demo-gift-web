@@ -22,7 +22,9 @@ export const GiftQuizModal: React.FC<GiftQuizModalProps> = ({
   const [selectedRel, setSelectedRel] = useState<RelationshipCategory>('lover');
   const [selectedPersonality, setSelectedPersonality] = useState<PersonalityTrait>('creative');
   const [selectedOccasion, setSelectedOccasion] = useState<OccasionType>('anniversary_love');
-  const [selectedBudgetIndex, setSelectedBudgetIndex] = useState(1); // 300k - 700k
+  const [selectedBudgetIndex, setSelectedBudgetIndex] = useState(
+    Math.max(0, BUDGET_PRESETS.findIndex((budget) => budget.label === '200k - 500k'))
+  );
 
   if (!isOpen) return null;
 
@@ -30,12 +32,13 @@ export const GiftQuizModal: React.FC<GiftQuizModalProps> = ({
 
   // Calculate matching gifts
   const matchedGifts = allGifts
+    .filter((gift) => gift.price >= currentBudget.min && gift.price <= currentBudget.max)
     .map((gift) => {
       let score = 0;
       if (gift.relationships.includes(selectedRel)) score += 40;
       if (gift.personalities.includes(selectedPersonality)) score += 30;
       if (gift.occasions.includes(selectedOccasion)) score += 20;
-      if (gift.price >= currentBudget.min && gift.price <= currentBudget.max) score += 10;
+      score += 10;
       return { gift, matchPercentage: Math.min(score, 99) };
     })
     .sort((a, b) => b.matchPercentage - a.matchPercentage)
@@ -250,55 +253,73 @@ export const GiftQuizModal: React.FC<GiftQuizModalProps> = ({
               <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-950">
                 Đã phân tích hồ sơ: <strong>{RELATIONSHIPS.find((r) => r.id === selectedRel)?.label}</strong>, tính cách{' '}
                 <strong>{PERSONALITY_TRAITS.find((p) => p.id === selectedPersonality)?.label}</strong>, ngân sách{' '}
-                <strong>{currentBudget.label}</strong>. Dưới đây là 3 lựa chọn có độ tương thích cao nhất:
+                <strong>{currentBudget.label}</strong>. Các gợi ý bên dưới đều nằm trong ngân sách đã chọn:
               </div>
 
-              <div className="space-y-3">
-                {matchedGifts.map(({ gift, matchPercentage }) => (
-                  <div
-                    key={gift.id}
-                    className="p-3.5 bg-white border border-stone-200 rounded-xl flex items-center justify-between gap-4 hover:border-stone-300 transition-all shadow-2xs"
-                  >
+              {matchedGifts.length > 0 ? (
+                <div className="space-y-3">
+                  {matchedGifts.map(({ gift, matchPercentage }) => (
                     <div
-                      onClick={() => {
-                        onClose();
-                        onOpenGiftDetail(gift);
-                      }}
-                      className="flex items-center gap-3.5 min-w-0 flex-1 cursor-pointer"
+                      key={gift.id}
+                      className="p-3.5 bg-white border border-stone-200 rounded-xl flex items-center justify-between gap-4 hover:border-stone-300 transition-all shadow-2xs"
                     >
-                      <img
-                        src={gift.image}
-                        alt={gift.title}
-                        className="w-16 h-16 rounded-lg object-cover border border-stone-200 shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                            {matchPercentage}% phù hợp
+                      <div
+                        onClick={() => {
+                          onClose();
+                          onOpenGiftDetail(gift);
+                        }}
+                        className="flex items-center gap-3.5 min-w-0 flex-1 cursor-pointer"
+                      >
+                        <img
+                          src={gift.image}
+                          alt={gift.title}
+                          className="w-16 h-16 rounded-lg object-cover border border-stone-200 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                              {matchPercentage}% phù hợp
+                            </span>
+                            <span className="text-xs text-stone-500">{gift.categoryName}</span>
+                          </div>
+                          <h4 className="font-serif text-sm font-bold text-stone-900 truncate">
+                            {gift.title}
+                          </h4>
+                          <span className="text-xs font-bold text-stone-900 tabular-nums">
+                            {formatVND(gift.price)}
                           </span>
-                          <span className="text-xs text-stone-500">{gift.categoryName}</span>
                         </div>
-                        <h4 className="font-serif text-sm font-bold text-stone-900 truncate">
-                          {gift.title}
-                        </h4>
-                        <span className="text-xs font-bold text-stone-900 tabular-nums">
-                          {formatVND(gift.price)}
-                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => onOpenAddToCollection(gift)}
+                          className="px-2.5 py-1.5 text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Bộ sưu tập</span>
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={() => onOpenAddToCollection(gift)}
-                        className="px-2.5 py-1.5 text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Bộ sưu tập</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-5 text-center bg-stone-50 border border-stone-200 rounded-xl space-y-3">
+                  <p className="text-sm font-semibold text-stone-800">
+                    Chưa có món quà phù hợp trong khoảng ngân sách này.
+                  </p>
+                  <p className="text-xs text-stone-500">
+                    Thử chọn ngân sách khác. Trắc nghiệm sẽ không hiển thị món vượt mức bạn đặt.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStep(4)}
+                    className="px-4 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-300 hover:bg-stone-100 rounded-lg cursor-pointer"
+                  >
+                    Đổi ngân sách
+                  </button>
+                </div>
+              )}
 
               <div className="flex justify-between pt-4 border-t border-stone-100">
                 <button

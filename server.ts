@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import { GIFTS_DATABASE } from './src/data/gifts';
+import { GiftItem, RelationshipCategory } from './src/types/gift';
 
 dotenv.config();
 
@@ -118,7 +120,7 @@ function generateFallbackCards(
 }
 
 // Fallback generator for Gift Recommendations
-function generateFallbackGifts(
+function generateLegacyFallbackGifts(
   recipientType: string,
   relationshipDetail: string,
   hobbies: any,
@@ -228,30 +230,82 @@ function generateFallbackGifts(
   };
 }
 
+function getAffordableGifts(recipientType: string, budget: number): GiftItem[] {
+  const targetPrice = budget * 0.8;
+  return GIFTS_DATABASE.filter((gift) => gift.price <= budget)
+    .sort((a, b) => {
+      const aMatchesRecipient = a.relationships.some((relationship) => relationship === recipientType);
+      const bMatchesRecipient = b.relationships.some((relationship) => relationship === recipientType);
+      return (
+        Number(bMatchesRecipient) - Number(aMatchesRecipient) ||
+        Math.abs(targetPrice - a.price) - Math.abs(targetPrice - b.price)
+      );
+    })
+}
+
+function generateFallbackGifts(
+  recipientType: string,
+  budget: number,
+  gifts: GiftItem[]
+) {
+  return {
+    recommendations: gifts.slice(0, 3).map((gift) => ({
+      title: gift.title,
+      category: gift.categoryName,
+      estimatedPrice: new Intl.NumberFormat('vi-VN').format(gift.price) + 'đ',
+      whyItFits:
+        gift.relationshipFit[recipientType as RelationshipCategory] || gift.whyItFits,
+      presentationIdea: gift.presentationTip,
+      actionTip: 'Kiểm tra giá hiện tại, phí giao hàng và độ uy tín của nơi bán trước khi mua.',
+    })),
+    consultantAdvice: `Các gợi ý đều có giá không vượt ngân sách ${new Intl.NumberFormat('vi-VN').format(budget)}đ. Hãy xác nhận lại giá bán hiện tại trước khi đặt mua.`,
+  };
+}
+
 // Endpoint for AI Gift Recommendations
 app.post('/api/gemini/suggest', async (req, res) => {
   const { recipientType, relationshipDetail, hobbies, budgetVND, occasion, specialNotes } = req.body;
+  const budget = Number(budgetVND);
+  if (!Number.isFinite(budget) || budget <= 0) {
+    return res.status(400).json({ error: 'Vui lòng nhập ngân sách hợp lệ lớn hơn 0.' });
+  }
+
+  const affordableGifts = getAffordableGifts(recipientType, budget);
+  if (affordableGifts.length === 0) {
+    return res.json({
+      error: 'Danh mục hiện chưa có món quà nào trong mức ngân sách này. Hãy thử tăng ngân sách.',
+    });
+  }
 
   // Try calling Gemini model with fallback cascade
   if (ai) {
     const prompt = `Bạn là chuyên gia tư vấn quà tặng tâm lý cao cấp tại Việt Nam.
-Hãy đề xuất 3 món quà độc đáo, tinh tế và cực kỳ phù hợp cho người nhận theo thông tin:
+Hãy chọn tối đa 3 món phù hợp nhất CHỈ từ danh sách sản phẩm bên dưới:
 - Đối tượng: ${recipientType} (${relationshipDetail || 'Không rõ'})
 - Sở thích/Phong cách sống: ${Array.isArray(hobbies) ? hobbies.join(', ') : hobbies || 'Đa dạng'}
-- Ngân sách dự kiến: ${budgetVND ? Number(budgetVND).toLocaleString('vi-VN') + ' VNĐ' : 'Linh hoạt'}
+- Ngân sách tối đa tuyệt đối: ${budget.toLocaleString('vi-VN')} VNĐ
 - Dịp tặng: ${occasion || 'Kỷ niệm đặc biệt'}
 - Chi tiết / Kỷ niệm riêng: ${specialNotes || 'Không có'}
+
+Không được tạo sản phẩm mới, thay đổi giá hoặc chọn món vượt ngân sách. Mỗi đề xuất phải chứa đúng giftId từ danh sách.
+Danh sách sản phẩm đủ ngân sách:
+${JSON.stringify(affordableGifts.map(({ id, title, categoryName, price, shortDesc, tags }) => ({
+  giftId: id,
+  title,
+  category: categoryName,
+  price,
+  description: shortDesc,
+  tags,
+})))}
 
 Yêu cầu trả về đúng định dạng JSON có cấu trúc sau:
 {
   "recommendations": [
     {
-      "title": "Tên món quà ngắn gọn và cuốn hút",
-      "category": "Danh mục",
-      "estimatedPrice": "Ước tính giá (VD: 650.000đ)",
+      "giftId": "ID phải lấy từ danh sách",
       "whyItFits": "Lý do tâm lý tại sao người nhận sẽ xúc động (2-3 câu sâu sắc)",
       "presentationIdea": "Cách gói hoặc tạo bất ngờ khi tặng",
-      "actionTip": "Gợi ý nơi mua hoặc cách đặt tại Việt Nam"
+      "actionTip": "Lời khuyên kiểm tra nơi mua, không tự bịa shop"
     }
   ],
   "consultantAdvice": "Lời khuyên tâm lý ngắn gọn từ chuyên gia về cách trao quà."
@@ -271,7 +325,38 @@ Yêu cầu trả về đúng định dạng JSON có cấu trúc sau:
         if (response.text) {
           const parsed = cleanJsonOutput(response.text);
           if (parsed && Array.isArray(parsed.recommendations)) {
-            return res.json(parsed);
+            const giftsById = new Map(affordableGifts.map((gift) => [gift.id, gift]));
+            const usedGiftIds = new Set<string>();
+            const recommendations = parsed.recommendations.flatMap((recommendation: any) => {
+              const gift = giftsById.get(recommendation?.giftId);
+              if (!gift || usedGiftIds.has(gift.id) || gift.price > budget) return [];
+              usedGiftIds.add(gift.id);
+              return [{
+                title: gift.title,
+                category: gift.categoryName,
+                estimatedPrice: new Intl.NumberFormat('vi-VN').format(gift.price) + 'đ',
+                whyItFits:
+                  typeof recommendation.whyItFits === 'string'
+                    ? recommendation.whyItFits
+                    : gift.whyItFits,
+                presentationIdea:
+                  typeof recommendation.presentationIdea === 'string'
+                    ? recommendation.presentationIdea
+                    : gift.presentationTip,
+                actionTip:
+                  typeof recommendation.actionTip === 'string'
+                    ? recommendation.actionTip
+                    : 'Kiểm tra giá hiện tại và độ uy tín của nơi bán trước khi mua.',
+              }];
+            }).slice(0, 3);
+
+            if (recommendations.length > 0) {
+              return res.json({
+                recommendations,
+                consultantAdvice:
+                  typeof parsed.consultantAdvice === 'string' ? parsed.consultantAdvice : '',
+              });
+            }
           }
         }
       } catch (err: any) {
@@ -281,7 +366,7 @@ Yêu cầu trả về đúng định dạng JSON có cấu trúc sau:
   }
 
   // Graceful fallback to guaranteed tailored synthesis
-  const fallback = generateFallbackGifts(recipientType, relationshipDetail, hobbies, budgetVND, occasion, specialNotes);
+  const fallback = generateFallbackGifts(recipientType, budget, affordableGifts);
   return res.json(fallback);
 });
 

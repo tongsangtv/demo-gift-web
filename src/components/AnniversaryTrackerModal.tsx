@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AnniversaryEvent, RelationshipCategory } from '../types/gift';
 import { RELATIONSHIPS, formatVND } from '../data/gifts';
 import { X, Calendar, Plus, Trash2, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
+import { formatVNDInput, parseVNDInput } from '../utils/currency';
 
 interface AnniversaryTrackerModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const AnniversaryTrackerModal: React.FC<AnniversaryTrackerModalProps> = (
       date,
       relationship,
       targetPerson: targetPerson.trim() || 'Người thân yêu',
-      plannedBudget: Number(plannedBudget) || undefined,
+      plannedBudget: parseVNDInput(plannedBudget),
       notes: notes.trim(),
     });
 
@@ -166,10 +167,11 @@ export const AnniversaryTrackerModal: React.FC<AnniversaryTrackerModalProps> = (
                     Dự trù ngân sách (VNĐ)
                   </label>
                   <input
-                    type="number"
-                    step="50000"
-                    value={plannedBudget}
-                    onChange={(e) => setPlannedBudget(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="VD: 1.000.000"
+                    value={formatVNDInput(plannedBudget)}
+                    onChange={(e) => setPlannedBudget(e.target.value.replace(/\D/g, ''))}
                     className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-md"
                   />
                 </div>

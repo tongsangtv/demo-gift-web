@@ -1,4 +1,6 @@
 import { GiftItem, RelationshipCategory, PersonalityTrait, OccasionType, HobbyCategory, GiftCollection } from '../types/gift';
+import { ADDITIONAL_GIFTS } from './giftCatalogExpansion';
+import { GIFT_TAGS } from './giftTags';
 
 export const HERO_IMAGE = '/images/hero_gift_unboxing_1792160969722.jpg';
 
@@ -130,11 +132,12 @@ export const OCCASIONS: OccasionOption[] = [
 ];
 
 export const BUDGET_PRESETS = [
-  { label: 'Dưới 300k', min: 0, max: 300000 },
-  { label: '300k - 700k', min: 300000, max: 700000 },
-  { label: '700k - 1.5 triệu', min: 700000, max: 1500000 },
-  { label: '1.5 - 3 triệu', min: 1500000, max: 3000000 },
-  { label: 'Trên 3 triệu', min: 3000000, max: 10000000 },
+  { label: 'Dưới 100k', min: 0, max: 100000 },
+  { label: 'Dưới 150k', min: 0, max: 150000 },
+  { label: '100k - 200k', min: 100000, max: 200000 },
+  { label: '200k - 500k', min: 200000, max: 500000 },
+  { label: '500k - 1 triệu', min: 500000, max: 1000000 },
+  { label: 'Trên 1 triệu', min: 1000000, max: 10000000 },
 ];
 
 export const DEFAULT_COLLECTIONS: GiftCollection[] = [
@@ -167,7 +170,7 @@ export const DEFAULT_COLLECTIONS: GiftCollection[] = [
   }
 ];
 
-export const GIFTS_DATABASE: GiftItem[] = [
+const CORE_GIFTS: GiftItem[] = [
   {
     id: 'gift-1',
     title: 'Cặp Nhẫn Bạc Tinh Giản Khắc Tọa Độ & Nước Hoa Niche',
@@ -186,14 +189,14 @@ export const GIFTS_DATABASE: GiftItem[] = [
     occasions: ['anniversary_love', 'valentine', 'wedding_anniversary'],
     price: 1850000,
     image: '/images/gift_couple_jewellery_perfume_1792160970374.jpg',
-    badge: 'Được yêu thích nhất',
-    rating: 4.96,
-    reviewsCount: 342,
+    badge: 'Lãng mạn & Cá nhân hóa',
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Set nhẫn bạc 925 thủ công khắc kinh độ vĩ độ nơi hai bạn lần đầu chạm ánh mắt nhau, kèm chai nước hoa hương gỗ ấm.',
     whyItFits: 'Món quà kết hợp giữa trang sức đeo hàng ngày (nhắc nhở sự hiện diện) và hương thơm kích hoạt ký ức cảm xúc bền vững của loài người.',
     presentationTip: 'Giấu chiếc hộp nhẫn bên dưới lớp rơm thơm, viết kèm tọa độ bí ẩn lên tấm thiệp để đối phương tự tra bản đồ.',
     shoppingAdvice: 'Có thể đặt khắc tên/tọa độ tại các tiệm bạc thiết kế ở Hà Nội/Sài Gòn (mất khoảng 2-3 ngày gia công).',
-    tags: ['Bạc 925', 'Khắc tên riêng', 'Nước hoa Niche', 'Lãng mạn']
+    tags: ['Bạc 925', 'Khắc tên riêng', 'Nước hoa Niche', 'Lãng mạn', GIFT_TAGS.personalized]
   },
   {
     id: 'gift-family-1',
@@ -214,13 +217,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 1350000,
     image: '/images/gift_family_wellness_set_1792161139594.jpg',
     badge: 'Hiếu kính & Bình an',
-    rating: 4.98,
-    reviewsCount: 215,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Hộp gỗ mộc sang trọng gồm 3 hũ trà dưỡng sinh an thần, cặp cốc gốm mộc Mom & Dad thủ công và khăn choàng dệt ấm.',
     whyItFits: 'Gửi gắm lời chúc sức khỏe dồi dào và nhắc nhở bố mẹ hãy nghỉ ngơi sau bao năm tháng hy sinh vì con cái.',
     presentationTip: 'Tự tay đun nước sôi, tráng ấm và dâng ly trà nóng đầu tiên kèm hộp quà trong bữa cơm sum họp cuối tuần.',
     shoppingAdvice: 'Các thương hiệu thảo mộc organic uy tín hoặc các tiệm gốm Bát Tràng nghệ nhân.',
-    tags: ['Quà tặng bố mẹ', 'Trà thảo mộc', 'Gốm Mom & Dad', 'Hiếu đạo']
+    tags: ['Quà tặng bố mẹ', 'Trà thảo mộc', 'Gốm Mom & Dad', 'Hiếu đạo', GIFT_TAGS.practical, GIFT_TAGS.giftBox, GIFT_TAGS.consumable]
   },
   {
     id: 'gift-coworker-1',
@@ -241,13 +244,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 790000,
     image: '/images/gift_coworker_desk_pen_1792161140395.jpg',
     badge: 'Chuyên nghiệp & Tinh tế',
-    rating: 4.94,
-    reviewsCount: 189,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Cuốn sổ da bò dập vân sang trọng có quai cài đồng thau cao cấp, kèm bút bi mực gel kim loại khắc laser tên đồng nghiệp.',
     whyItFits: 'Thể hiện sự trân trọng sự nghiệp và sự đồng hành của đồng nghiệp trong những dự án deadline cam go.',
     presentationTip: 'Kẹp tấm thiệp chúc mừng thăng tiến vào ngay trang đầu tiên của cuốn sổ.',
     shoppingAdvice: 'Các xưởng chế tác da thủ công hoặc thương hiệu sổ tay Midori / Lamy uy tín.',
-    tags: ['Bút ký khắc tên', 'Sổ tay bìa da', 'Quà đồng nghiệp', 'Thăng chức']
+    tags: ['Bút ký khắc tên', 'Sổ tay bìa da', 'Quà đồng nghiệp', 'Thăng chức', GIFT_TAGS.practical, GIFT_TAGS.personalized]
   },
   {
     id: 'gift-2',
@@ -269,13 +272,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 780000,
     image: '/images/gift_experience_workshop_1792160971470.jpg',
     badge: 'Trải nghiệm đáng nhớ',
-    rating: 4.94,
-    reviewsCount: 218,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Buổi trải nghiệm nặn và xoay gốm tại xưởng gốm nghệ thuật, tự tay tạo ra 2 chiếc cốc kỷ niệm để mang về.',
     whyItFits: 'Theo tâm lý học, những món quà mang tính "trải nghiệm chung" tạo ra dopamine và hoài niệm bền vững hơn gấp nhiều lần đồ vật vô tri.',
     presentationTip: 'In chiếc voucher dưới dạng vé xem phim phong cách retro, kẹp trong cuốn sách yêu thích của người ấy.',
     shoppingAdvice: 'Các xưởng gốm nổi tiếng như Vườn Nhà Gốm, Haru Craft, Gốm Chi thường nhận đặt chỗ trước 3-5 ngày vào cuối tuần.',
-    tags: ['Workshop', 'Thủ công', 'Gắn kết', 'Kỷ niệm']
+    tags: ['Workshop', 'Thủ công', 'Gắn kết', 'Kỷ niệm', GIFT_TAGS.experience, GIFT_TAGS.surprise]
   },
   {
     id: 'gift-3',
@@ -296,13 +299,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 520000,
     image: '/images/gift_friendship_care_box_1792160971624.jpg',
     badge: 'Ấm áp & Chân thành',
-    rating: 4.91,
-    reviewsCount: 165,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Hộp quà mộc mạc gồm nến thơm hổ phách thư giãn, hũ trà hoa cúc hữu cơ và 6 tấm ảnh chụp film kẹp thiệp tay.',
     whyItFits: 'Thể hiện sự quan tâm tinh tế đến giấc ngủ và sức khỏe tinh thần của người bạn thân sau những ngày làm việc áp lực.',
     presentationTip: 'Tự tay chọn những bức ảnh "dìm hàng đáng yêu" từ những chuyến đi chung để kẹp trong nắp hộp.',
     shoppingAdvice: 'Dễ dàng gom đồ từ các tiệm nến thơm thủ công nội địa Việt Nam, hoặc tự decor hộp kraft vintage.',
-    tags: ['Nến thơm', 'Thư giãn', 'Quà bạn thân', 'Trà hoa']
+    tags: ['Nến thơm', 'Thư giãn', 'Quà bạn thân', 'Trà hoa', GIFT_TAGS.consumable, GIFT_TAGS.giftBox]
   },
   {
     id: 'gift-4',
@@ -326,13 +329,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 950000,
     image: '/images/gift_retro_speaker_1792161049095.jpg',
     badge: 'Tinh tế không gian',
-    rating: 4.88,
-    reviewsCount: 290,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Chiếc loa bluetooth hoàn thiện bằng gỗ óc chó mộc mạc với núm vặn kim loại brass, âm bass ấm áp cho góc chill.',
     whyItFits: 'Vừa là thiết bị nghe nhạc acoustic/lofi mỗi tối, vừa là món decor sang trọng làm sáng bừng góc bàn làm việc.',
     presentationTip: 'Trước khi tặng, hãy kết nối sẵn điện thoại và tạo một playlist Spotify riêng mang tên người nhận, bật sẵn khi họ mở hộp.',
     shoppingAdvice: 'Lựa chọn các dòng loa Divoom Ditoo, Muzen OTR hoặc dòng loa thủ công bọc gỗ cao cấp.',
-    tags: ['Loa Bluetooth', 'Gỗ óc chó', 'Âm nhạc', 'Trang trí']
+    tags: ['Loa Bluetooth', 'Gỗ óc chó', 'Âm nhạc', 'Trang trí', GIFT_TAGS.practical, GIFT_TAGS.decor]
   },
   {
     id: 'gift-5',
@@ -353,13 +356,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 380000,
     image: '/images/gift_scrapbook_camera_1792161050191.jpg',
     badge: 'Chạm tới trái tim',
-    rating: 4.98,
-    reviewsCount: 420,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Cuốn sổ thủ công bìa vải thô chứa đựng từng tấm ảnh polaroid, cuống vé xem phim đầu tiên và những dòng nhật ký tình yêu.',
     whyItFits: 'Món quà vô giá không đo bằng tiền mặt mà bằng thời gian và công sức bạn bỏ ra để lưu giữ hành trình cả hai cùng đi qua.',
     presentationTip: 'Chừa lại 5 trang cuối cùng còn trống và ghi: "Dành cho những chuyến đi tiếp theo của chúng mình".',
     shoppingAdvice: 'Mua combo sổ kraft và bút gel nhũ trên Shopee, in ảnh dạng polaroid tại các tiệm in online chỉ 2k/tấm.',
-    tags: ['Scrapbook', 'Kỷ niệm 1 năm', 'Ảnh Polaroid', 'Handmade']
+    tags: ['Scrapbook', 'Kỷ niệm 1 năm', 'Ảnh Polaroid', 'Handmade', GIFT_TAGS.handmade, GIFT_TAGS.personalized]
   },
   {
     id: 'gift-6',
@@ -381,13 +384,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 3200000,
     image: '/images/gift_couple_watches_1792161049450.jpg',
     badge: 'Biểu tượng thời gian',
-    rating: 4.95,
-    reviewsCount: 154,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Đồng hồ đôi thiết kế Bauhaus dây da bò Ý mềm mại, chống nước 5ATM, biểu trưng cho lời thề gắn kết cùng năm tháng.',
     whyItFits: 'Đồng hồ mang thông điệp "Từng giây từng phút của anh/em đều hướng về đối phương", cực kỳ trang trọng và giá trị lâu bền.',
     presentationTip: 'Chỉnh cả 2 mặt đồng hồ khớp đúng thời khắc kỷ niệm hoặc sinh nhật trước khi trao tay.',
     shoppingAdvice: 'Các thương hiệu đồng hồ thiết kế uy tín tại VN như Curnon, Daniel Wellington hoặc Seiko bản tối giản.',
-    tags: ['Đồng hồ đôi', 'Kỷ niệm ngày cưới', 'Da bò Ý', 'Sang trọng']
+    tags: ['Đồng hồ đôi', 'Kỷ niệm ngày cưới', 'Da bò Ý', 'Sang trọng', GIFT_TAGS.practical]
   },
   {
     id: 'gift-7',
@@ -410,13 +413,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 890000,
     image: '/images/gift_coffee_brewing_set_1792161048979.jpg',
     badge: 'Gu thưởng thức',
-    rating: 4.92,
-    reviewsCount: 178,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Phễu lọc gốm V60 thủ công, bình đựng thủy tinh chịu nhiệt vân gỗ, ấm cổ ngỗng và gói cà phê hạt Arabica Cầu Đất rang mộc.',
     whyItFits: 'Tạo nên một thói quen chậm rãi mỗi sáng, người nhận sẽ luôn nhớ đến bạn mỗi khi ngửi thấy hương cà phê thơm nồng.',
     presentationTip: 'Gửi kèm một hướng dẫn công thức pha tỉ lệ vàng 1:15 viết tay trên giấy kraft.',
     shoppingAdvice: 'Các roastery specialty coffee uy tín tại Đà Lạt, Sài Gòn (Every Half, The Workshop, XLIII) hoặc Hario chính hãng.',
-    tags: ['Cà phê Specialty', 'Pour Over', 'Gốm thủ công', 'Chill buổi sáng']
+    tags: ['Cà phê Specialty', 'Pour Over', 'Gốm thủ công', 'Chill buổi sáng', GIFT_TAGS.practical, GIFT_TAGS.consumable]
   },
   {
     id: 'gift-12',
@@ -440,13 +443,13 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 1190000,
     image: '/images/gift_family_wellness_set_1792161139594.jpg',
     badge: 'Cực kỳ thiết thực',
-    rating: 4.9,
-    reviewsCount: 450,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Máy massage mô phỏng bàn tay người xoa bóp chuyên sâu, kết hợp đèn sưởi hồng ngoại giảm đau mỏi cơ cổ hiệu quả.',
     whyItFits: 'Đối với dân văn phòng ngồi máy tính 8 tiếng/ngày hay bố mẹ lớn tuổi, không có món quà nào chứng minh sự quan tâm sâu sắc bằng việc chữa lành cơ thể.',
     presentationTip: 'Kèm theo lời nhắn: "Những lúc con/em không ở cạnh, chiếc máy này sẽ thay con/anh xoa dịu mệt mỏi cho mẹ/bạn".',
     shoppingAdvice: 'Các thương hiệu Philips, Breo, SKG hoặc Jeeback chính hãng bảo hành 12 tháng.',
-    tags: ['Massage', 'Dân văn phòng', 'Sức khỏe', 'Thiết thực']
+    tags: ['Massage', 'Dân văn phòng', 'Sức khỏe', 'Thiết thực', GIFT_TAGS.practical]
   },
   {
     id: 'gift-16',
@@ -465,15 +468,15 @@ export const GIFTS_DATABASE: GiftItem[] = [
     categoryName: 'Sách & Boardgame',
     occasions: ['friendship_day', 'birthday', 'just_because'],
     price: 250000,
-    image: '/images/gift_friendship_care_box_1792160971624.jpg',
+    image: '/images/gift_card_game.jpg',
     badge: 'Cười vỡ bụng',
-    rating: 4.92,
-    reviewsCount: 520,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Bộ thẻ bài hội tụ 120 thử thách và câu hỏi bóc phốt quá khứ, những bí mật chưa từng tiết lộ giữa nhóm bạn thân.',
     whyItFits: 'Không khí những buổi tụ tập qua đêm (sleepover) sẽ trở nên bùng nổ, kéo nhóm bạn lại gần nhau hơn sau thời gian dài bận rộn.',
     presentationTip: 'Mua kèm một túi snack khổng lồ và vài lon nước ngọt để sẵn sàng cho một đêm không ngủ.',
     shoppingAdvice: 'Có sẵn trên Shopee Mall các nhà xuất bản boardgame trẻ Việt Nam.',
-    tags: ['Boardgame nhóm', 'Hài hước', 'Tiệc bạn thân', 'Dưới 300k']
+    tags: ['Boardgame nhóm', 'Hài hước', 'Tiệc bạn thân', 'Dưới 300k', GIFT_TAGS.experience]
   },
   {
     id: 'gift-18',
@@ -494,15 +497,15 @@ export const GIFTS_DATABASE: GiftItem[] = [
     categoryName: 'Thể thao & Hoạt động',
     occasions: ['birthday', 'graduation_job', 'just_because'],
     price: 490000,
-    image: '/images/gift_coworker_desk_pen_1792161140395.jpg',
+    image: '/images/gift_bottle.jpg',
     badge: 'Bạn đồng hành mỗi ngày',
-    rating: 4.93,
-    reviewsCount: 280,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Bình thép không gỉ 316 an toàn tuyệt đối, lớp phủ sơn tĩnh điện nhám mịn, nắp chống tràn và khắc laser tên tinh xảo.',
     whyItFits: 'Nhắc nhở người ấy uống đủ nước mỗi ngày, là vật dụng luôn đồng hành từ văn phòng đến phòng tập gym.',
     presentationTip: 'Rót sẵn một bình trà đào cam sả thơm lừng vào bên trong trước khi đưa cho người ấy.',
     shoppingAdvice: 'Các dòng Lock&Lock, Stanley hoặc Thermos với dịch vụ khắc tên laser theo yêu cầu.',
-    tags: ['Bình giữ nhiệt', 'Khắc laser', 'Văn phòng', 'Chăm sóc']
+    tags: ['Bình giữ nhiệt', 'Khắc laser', 'Văn phòng', 'Chăm sóc', GIFT_TAGS.practical, GIFT_TAGS.personalized]
   },
   {
     id: 'gift-10',
@@ -521,15 +524,15 @@ export const GIFTS_DATABASE: GiftItem[] = [
     categoryName: 'Trải nghiệm & Hẹn hò',
     occasions: ['anniversary_love', 'wedding_anniversary', 'valentine'],
     price: 2400000,
-    image: '/images/hero_gift_unboxing_1792160969722.jpg',
+    image: '/images/gift_river_cruise.jpg',
     badge: 'Kỷ niệm đẳng cấp',
-    rating: 4.97,
-    reviewsCount: 140,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Set menu 5 món âu cao cấp kèm rượu vang thưởng thức trong không gian lộng gió trên du thuyền khi hoàng hôn buông xuống.',
     whyItFits: 'Phá vỡ không khí thường nhật, tạo nên một cột mốc đặc biệt mà đối phương sẽ luôn hào hứng kể lại với bạn bè.',
     presentationTip: 'Giữ bí mật điểm đến cho đến tận lúc xe dừng bánh tại bến du thuyền.',
     shoppingAdvice: 'Du thuyền Saigon Princess, ROS Yacht Club hoặc King Yacht tại bến Bạch Đằng.',
-    tags: ['Du thuyền', 'Dinner Date', 'Hoàng hôn', 'Kỷ niệm cưới']
+    tags: ['Du thuyền', 'Dinner Date', 'Hoàng hôn', 'Kỷ niệm cưới', GIFT_TAGS.experience, GIFT_TAGS.surprise]
   },
   {
     id: 'gift-8',
@@ -549,15 +552,15 @@ export const GIFTS_DATABASE: GiftItem[] = [
     categoryName: 'Công nghệ & Tiện ích',
     occasions: ['birthday', 'anniversary_love', 'friendship_day', 'valentine'],
     price: 1650000,
-    image: '/images/gift_scrapbook_camera_1792161050191.jpg',
+    image: '/images/gift_photo_printer.jpg',
     badge: 'Tiện lợi & Thú vị',
-    rating: 4.89,
-    reviewsCount: 260,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Máy in ảnh công nghệ in nhiệt không cần mực, in ngay những bức hình xinh xắn trong điện thoại bất cứ lúc nào.',
     whyItFits: 'Giúp chuyển đổi những bức hình kỹ thuật số vô tận thành vật phẩm thực tế có thể cầm nắm và dán ốp lưng điện thoại.',
     presentationTip: 'In sẵn 1 bức hình selfie lém lỉnh của hai bạn nhét sẵn vào khay ra ảnh của máy.',
     shoppingAdvice: 'Tham khảo dòng Xiaomi Pocket Photo Printer hoặc Canon PV-123 / Fujifilm Instax Link.',
-    tags: ['Máy in ảnh', 'Chụp ảnh', 'Yêu xa', 'Kỷ niệm tức thì']
+    tags: ['Máy in ảnh', 'Chụp ảnh', 'Yêu xa', 'Kỷ niệm tức thì', GIFT_TAGS.practical]
   },
   {
     id: 'gift-11',
@@ -576,15 +579,15 @@ export const GIFTS_DATABASE: GiftItem[] = [
     categoryName: 'Sách & Boardgame',
     occasions: ['anniversary_love', 'valentine', 'just_because'],
     price: 290000,
-    image: '/images/gift_friendship_care_box_1792160971624.jpg',
+    image: '/images/gift_boardgame.jpg',
     badge: 'Gắn kết chiều sâu',
-    rating: 4.93,
-    reviewsCount: 388,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Bộ 100 câu hỏi tâm lý đào sâu từ tuổi thơ, ước mơ, tổn thương cho đến những tưởng tượng tương lai của hai người.',
     whyItFits: 'Giúp các cặp đôi mở lòng chia sẻ những điều khó nói hàng ngày, chuyển từ yêu bề nổi sang thấu hiểu tâm can.',
     presentationTip: 'Chuẩn bị một góc thảm êm, một ly vang ấm và giao kèo: "Đêm nay chúng mình không dùng điện thoại".',
     shoppingAdvice: 'Các bộ bài "We\'re Not Really Strangers" phiên bản Việt hóa hoặc bộ bài The Couple Game.',
-    tags: ['Boardgame cặp đôi', 'Tâm lý', 'Kết nối', 'Dưới 300k']
+    tags: ['Boardgame cặp đôi', 'Tâm lý', 'Kết nối', 'Dưới 300k', GIFT_TAGS.experience, GIFT_TAGS.surprise]
   },
   {
     id: 'gift-14',
@@ -607,15 +610,17 @@ export const GIFTS_DATABASE: GiftItem[] = [
     price: 460000,
     image: '/images/gift_family_wellness_set_1792161139594.jpg',
     badge: 'Thanh lịch & Nhẹ nhàng',
-    rating: 4.86,
-    reviewsCount: 134,
+    rating: 0,
+    reviewsCount: 0,
     shortDesc: 'Set 6 loại trà hoa organic (hoa cúc, hoa hồng Pháp, hoa đậu biếc, táo đỏ kỷ tử) bồi bổ nhan sắc và an thần.',
     whyItFits: 'Một món quà thể hiện sự thanh lịch, không quá áp lực về mặt tiền bạc nhưng đem lại cảm giác được nâng niu.',
     presentationTip: 'Tự tay pha một bình trà ấm mời người nhận uống kèm khi trao hộp quà.',
     shoppingAdvice: 'Các tiệm thảo mộc hữu cơ uy tín tại Hà Nội và TP.HCM.',
-    tags: ['Trà hoa', 'Sức khỏe', 'Đồng nghiệp', 'Dưới 500k']
+    tags: ['Trà hoa', 'Sức khỏe', 'Đồng nghiệp', 'Dưới 500k', GIFT_TAGS.consumable, GIFT_TAGS.giftBox]
   }
 ];
+
+export const GIFTS_DATABASE: GiftItem[] = [...CORE_GIFTS, ...ADDITIONAL_GIFTS];
 
 export function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN', {

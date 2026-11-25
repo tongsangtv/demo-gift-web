@@ -36,6 +36,7 @@ export const GiftDetailModal: React.FC<GiftDetailModalProps> = ({
   isInAnyCollection,
 }) => {
   const [copiedIdea, setCopiedIdea] = useState(false);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
 
   if (!isOpen || !gift) return null;
 
@@ -58,9 +59,15 @@ export const GiftDetailModal: React.FC<GiftDetailModalProps> = ({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>{gift.categoryName}</span>
             <span aria-hidden="true">·</span>
-            <span className="font-medium text-stone-700">★ {gift.rating.toFixed(1)}</span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">({gift.reviewsCount} đánh giá)</span>
+            {gift.reviewsCount > 0 ? (
+              <>
+                <span className="font-medium text-stone-700">★ {gift.rating.toFixed(1)}</span>
+                <span aria-hidden="true">·</span>
+                <span className="tabular-nums">({gift.reviewsCount} đánh giá)</span>
+              </>
+            ) : (
+              <span>Chưa có đánh giá</span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -75,12 +82,20 @@ export const GiftDetailModal: React.FC<GiftDetailModalProps> = ({
           {/* Top Hero Layout: Image + Core Information */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-start">
             <div className="sm:col-span-5 relative rounded-xl overflow-hidden aspect-4/3 bg-stone-100 border border-stone-200 shadow-2xs">
-              <img
-                src={gift.image}
-                alt={gift.title}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+              {failedImage === gift.image ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-stone-100 p-4 text-center text-stone-500">
+                  <Sparkles className="h-8 w-8 text-stone-300" />
+                  <span className="text-xs font-medium">{gift.title}</span>
+                </div>
+              ) : (
+                <img
+                  src={gift.image}
+                  alt={gift.title}
+                  onError={() => setFailedImage(gift.image)}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              )}
               {gift.badge && (
                 <div className="absolute top-2.5 left-2.5">
                   <span className="text-[11px] font-medium tracking-wide bg-stone-900/80 text-white px-2 py-0.5 rounded-sm">
@@ -124,7 +139,7 @@ export const GiftDetailModal: React.FC<GiftDetailModalProps> = ({
                   ) : (
                     <>
                       <Plus className="w-4 h-4" />
-                      <span>+ Thêm vào bộ sưu tập</span>
+                      <span>Thêm vào bộ sưu tập</span>
                     </>
                   )}
                 </button>

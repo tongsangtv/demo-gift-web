@@ -29,6 +29,7 @@ import {
 import { CardExportModal } from './CardExportModal';
 import { CardThemeId } from '../types/cardExport';
 import { renderCardToCanvas, downloadCardAsPNG } from '../utils/cardCanvasRenderer';
+import { formatVNDInput } from '../utils/currency';
 
 interface AIAssistantModalProps {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
   const [activeTab, setActiveTab] = useState<'card' | 'gifts'>('card');
 
   // Card Form State
-  const [cardRecipientName, setCardRecipientName] = useState('Bé Miu');
+  const [cardRecipientName, setCardRecipientName] = useState('Bé Trúc');
   const [cardRel, setCardRel] = useState<RelationshipCategory>(defaultRelationship);
   const [cardOccasionType, setCardOccasionType] = useState<OccasionType | 'custom'>('anniversary_love');
   const [cardOccasionCustom, setCardOccasionCustom] = useState(initialOccasion || '');
@@ -192,8 +193,8 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
       if (data.recommendations && data.recommendations.length > 0) {
         setGiftRecommendations(data.recommendations);
         setConsultantAdvice(data.consultantAdvice || '');
-      } else if (data.error) {
-        setErrorMessage(data.error);
+      } else {
+        setErrorMessage(data.error || 'Không tìm thấy món quà trong ngân sách đã nhập.');
       }
     } catch (err: any) {
       console.error(err);
@@ -260,13 +261,11 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         senderName: 'Từ người thương',
         occasion: getEffectiveOccasion(),
         message: msg,
-        giftTitle: getEffectiveGiftDetails(),
         dateString: dateStr,
         theme,
         aspectRatio: 'story',
         fontStyle: 'serif',
         showWaxSeal: true,
-        showGiftBadge: true,
         showWatermark: true,
       });
 
@@ -358,7 +357,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                   type="button"
                   onClick={() =>
                     applyCardPreset(
-                      'Bé Miu',
+                      'Bé Trúc',
                       'lover',
                       'anniversary_love',
                       '',
@@ -414,7 +413,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                     <input
                       type="text"
                       required
-                      placeholder="VD: Bé Miu, Mẹ yêu, Anh Nam, Bạn Trang..."
+                      placeholder="VD: Bé Trúc, Mẹ yêu, Anh Nam, Bạn Trang..."
                       value={cardRecipientName}
                       onChange={(e) => setCardRecipientName(e.target.value)}
                       className="w-full px-3 py-2 text-xs bg-white border border-stone-300 rounded-lg focus:ring-1 focus:ring-stone-900 focus:outline-hidden"
@@ -830,13 +829,17 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
                       Ngân sách dự tính (VNĐ)
                     </label>
                     <input
-                      type="number"
-                      step="50000"
-                      placeholder="VD: 800000"
-                      value={budgetVND}
-                      onChange={(e) => setBudgetVND(e.target.value)}
+                      type="text"
+                      inputMode="numeric"
+                      required
+                      placeholder="VD: 800.000"
+                      value={formatVNDInput(budgetVND)}
+                      onChange={(e) => setBudgetVND(e.target.value.replace(/\D/g, ''))}
                       className="w-full px-3 py-2 text-xs bg-white border border-stone-300 rounded-lg focus:ring-1 focus:ring-stone-900 focus:outline-hidden"
                     />
+                    <p className="mt-1 text-[11px] text-stone-500">
+                      Chỉ đề xuất sản phẩm trong danh mục có giá không vượt ngân sách này.
+                    </p>
                   </div>
                 </div>
 
@@ -887,7 +890,7 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
               {giftRecommendations.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
-                    Đề xuất quà tặng được cá nhân hóa:
+                    Đề xuất trong ngân sách {formatVND(Number(budgetVND))}:
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     {giftRecommendations.map((rec, i) => (
@@ -961,7 +964,6 @@ export const AIAssistantModal: React.FC<AIAssistantModalProps> = ({
         initialMessage={exportModal.message}
         recipientName={cardRecipientName || 'Người thương'}
         occasion={getEffectiveOccasion()}
-        giftTitle={getEffectiveGiftDetails()}
         styleName={exportModal.styleName}
       />
     </div>

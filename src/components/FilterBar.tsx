@@ -74,7 +74,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
               <option value="recommended">Gợi ý nổi bật</option>
               <option value="price_asc">Giá: Thấp đến cao</option>
               <option value="price_desc">Giá: Cao đến thấp</option>
-              <option value="rating">Đánh giá cao nhất</option>
             </select>
           </div>
 

@@ -38,7 +38,6 @@ interface CardExportModalProps {
   initialMessage: string;
   recipientName: string;
   occasion: string;
-  giftTitle?: string;
   styleName?: string;
 }
 
@@ -48,7 +47,6 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
   initialMessage,
   recipientName,
   occasion,
-  giftTitle,
   styleName,
 }) => {
   // Current date formatted in Vietnamese
@@ -74,8 +72,6 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
   const [sender, setSender] = useState('Từ người thương');
   const [occ, setOcc] = useState(occasion || 'Kỷ niệm đặc biệt');
   const [message, setMessage] = useState(initialMessage || '');
-  const [gift, setGift] = useState(giftTitle || '');
-  const [showGiftBadge, setShowGiftBadge] = useState(Boolean(giftTitle));
   const [showWaxSeal, setShowWaxSeal] = useState(true);
   const [dateString, setDateString] = useState(getTodayVietnamese());
 
@@ -93,8 +89,6 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
       setMessage(initialMessage || '');
       setRecipient(recipientName || 'Người thương');
       setOcc(occasion || 'Kỷ niệm đặc biệt');
-      setGift(giftTitle || '');
-      setShowGiftBadge(Boolean(giftTitle));
       setDateString(getTodayVietnamese());
 
       if (styleName?.includes('Hài hước')) setTheme('vintage_kraft');
@@ -102,7 +96,7 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
       else if (styleName?.includes('Lãng mạn')) setTheme('pastel_romance');
       else setTheme('ivory_blossom');
     }
-  }, [isOpen, initialMessage, recipientName, occasion, giftTitle, styleName]);
+  }, [isOpen, initialMessage, recipientName, occasion, styleName]);
 
   // Re-render canvas whenever export data changes
   useEffect(() => {
@@ -116,13 +110,11 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
       senderName: sender,
       occasion: occ,
       message,
-      giftTitle: gift,
       dateString,
       theme,
       aspectRatio,
       fontStyle,
       showWaxSeal,
-      showGiftBadge,
       showWatermark: true,
     };
 
@@ -153,13 +145,11 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
     sender,
     occ,
     message,
-    gift,
     dateString,
     theme,
     aspectRatio,
     fontStyle,
     showWaxSeal,
-    showGiftBadge,
   ]);
 
   if (!isOpen) return null;
@@ -265,11 +255,16 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
               <div
                 className={`relative transition-all duration-200 rounded-xl overflow-hidden shadow-xl ring-1 ring-black/10 bg-white ${
                   aspectRatio === 'story'
-                    ? 'max-w-[340px] sm:max-w-[380px] aspect-[9/13.5]'
+                  ? 'w-full max-w-[340px] sm:max-w-[380px]'
                     : aspectRatio === 'postcard'
                     ? 'max-w-[460px] aspect-[4/3]'
                     : 'max-w-[380px] aspect-square'
                 }`}
+                style={
+                aspectRatio === 'story' && canvasRef.current
+                  ? { aspectRatio: `${canvasRef.current.width} / ${canvasRef.current.height}` }
+                  : undefined
+                }
               >
                 <canvas
                   ref={canvasRef}
@@ -473,18 +468,8 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
                 />
               </div>
 
-              {/* Gift & Wax Seal Toggles */}
+              {/* Wax Seal Toggle */}
               <div className="flex flex-wrap items-center gap-4 pt-1 border-t border-stone-200/60 text-xs">
-                <label className="flex items-center gap-1.5 cursor-pointer text-stone-700">
-                  <input
-                    type="checkbox"
-                    checked={showGiftBadge}
-                    onChange={(e) => setShowGiftBadge(e.target.checked)}
-                    className="rounded border-stone-300 text-stone-900 focus:ring-stone-900"
-                  />
-                  <span>Hiện món quà gửi kèm</span>
-                </label>
-
                 <label className="flex items-center gap-1.5 cursor-pointer text-stone-700">
                   <input
                     type="checkbox"
@@ -496,20 +481,6 @@ export const CardExportModal: React.FC<CardExportModalProps> = ({
                 </label>
               </div>
 
-              {showGiftBadge && (
-                <div>
-                  <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                    Tên món quà
-                  </label>
-                  <input
-                    type="text"
-                    value={gift}
-                    onChange={(e) => setGift(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-stone-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-stone-900"
-                    placeholder="VD: Nhẫn Bạc Đôi Khắc Tên"
-                  />
-                </div>
-              )}
             </div>
 
             {/* 5. Message Content Live Editor */}

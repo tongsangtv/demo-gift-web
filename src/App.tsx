@@ -27,6 +27,7 @@ import { GiftQuizModal } from './components/GiftQuizModal';
 import { AnniversaryTrackerModal } from './components/AnniversaryTrackerModal';
 import { Footer } from './components/Footer';
 import { RotateCcw, Sparkles, Filter, Bookmark, Heart } from 'lucide-react';
+import { rankGiftRecommendations } from './utils/giftRecommendation';
 
 const INITIAL_FILTER: FilterState = {
   relationship: 'all',
@@ -38,6 +39,8 @@ const INITIAL_FILTER: FilterState = {
   searchQuery: '',
   sortBy: 'recommended',
 };
+
+const GIFTS_PER_PAGE = 15;
 
 const DEFAULT_ANNIVERSARY_EVENTS: AnniversaryEvent[] = [
   {
@@ -93,6 +96,7 @@ export default function App() {
 
   // Filters state
   const [filter, setFilter] = useState<FilterState>(INITIAL_FILTER);
+  const [giftPage, setGiftPage] = useState(0);
 
   // Modals state
   const [isCollectionsOpen, setIsCollectionsOpen] = useState(false);
@@ -250,7 +254,7 @@ export default function App() {
 
   // Filtered and Sorted Gifts
   const filteredGifts = useMemo(() => {
-    return GIFTS_DATABASE.filter((gift) => {
+    const matchingGifts = GIFTS_DATABASE.filter((gift) => {
       // Relationship filter
       if (
         filter.relationship !== 'all' &&
@@ -300,13 +304,27 @@ export default function App() {
       }
 
       return true;
-    }).sort((a, b) => {
+    });
+
+    if (filter.sortBy === 'recommended') {
+      return rankGiftRecommendations(matchingGifts, filter);
+    }
+
+    return matchingGifts.sort((a, b) => {
       if (filter.sortBy === 'price_asc') return a.price - b.price;
-      if (filter.sortBy === 'price_desc') return b.price - a.price;
-      if (filter.sortBy === 'rating') return b.rating - a.rating;
-      return 0; // recommended preserves curated order
+      return b.price - a.price;
     });
   }, [filter]);
+
+  useEffect(() => {
+    setGiftPage(0);
+  }, [filter]);
+
+  const pageCount = Math.ceil(filteredGifts.length / GIFTS_PER_PAGE);
+  const visibleGifts = filteredGifts.slice(
+    giftPage * GIFTS_PER_PAGE,
+    (giftPage + 1) * GIFTS_PER_PAGE
+  );
 
   // Total unique saved gifts across all collections
   const totalSavedInCollections = useMemo(() => {
@@ -386,7 +404,7 @@ export default function App() {
         {/* 4. Products Grid */}
         {filteredGifts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredGifts.map((gift) => {
+            {visibleGifts.map((gift) => {
               const isInAnyCollection = collections.some((col) =>
                 col.giftIds.includes(gift.id)
               );
@@ -438,6 +456,29 @@ export default function App() {
                 <span>Nhờ AI gợi ý riêng theo câu chuyện</span>
               </button>
             </div>
+          </div>
+        )}
+        {pageCount > 1 && (
+          <div className="flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setGiftPage((page) => Math.max(0, page - 1))}
+              disabled={giftPage === 0}
+              className="px-4 py-2 text-sm font-medium border border-stone-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100"
+            >
+              Trước
+            </button>
+            <span className="text-sm text-stone-600">
+              Trang {giftPage + 1} / {pageCount} · tối đa {GIFTS_PER_PAGE} món mỗi trang
+            </span>
+            <button
+              type="button"
+              onClick={() => setGiftPage((page) => Math.min(pageCount - 1, page + 1))}
+              disabled={giftPage >= pageCount - 1}
+              className="px-4 py-2 text-sm font-medium border border-stone-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100"
+            >
+              Tiếp
+            </button>
           </div>
         )}
       </main>

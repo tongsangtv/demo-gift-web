@@ -83,7 +83,7 @@ export interface FilterState {
   minPrice: number;
   maxPrice: number;
   searchQuery: string;
-  sortBy: 'recommended' | 'price_asc' | 'price_desc' | 'rating';
+  sortBy: 'recommended' | 'price_asc' | 'price_desc';
 }
 
 export interface AIRecommendation {
